@@ -1,0 +1,22 @@
+<%
+  // Store the argument that will be passed to MAP
+  [ 'gts' 'pre' 'post' 'occ' 'steps' ] STORE
+  
+  // Build the custom mapper
+  <%
+    // Make a GTS from the moving window
+    LIST-> DROP [ 'cur' 'c' 'l' 't' 'lat' 'lon' 'elev' 'v' ] STORE
+    $t [] [] [] $v MAKEGTS
+    
+    // Apply the anomaly detection test
+    true 3.0 ZSCORETEST
+    
+    // Output one value per anomalous tick found
+    0 'i' STORE
+    { SWAP <% $i TOSTRING [ 3 ROLL NaN NaN NaN true ] $i 1 + 'i' STORE %> FOREACH }
+  %>
+  MACROMAPPER 3 MAXLONG STRICTMAPPER 'mapper_zscore_test' STORE
+
+  // call MAP to create the boolean GTS with the flagged anomalies
+  [ $gts $mapper_zscore_test $pre $post $occ $steps true ] MAP MERGE 'anomalies' RENAME
+%>
