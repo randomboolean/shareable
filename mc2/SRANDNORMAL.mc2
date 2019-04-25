@@ -1,0 +1,52 @@
+{
+  'name' 'SRANDNORMAL'
+  'desc' 'Generate random numbers from a normal distribution with mean 0.0 and std 1.0. The random generator must have been initilialized beforehand with a seed using PRNG.'
+  'sig' [ [ [ 'count:LONG' ]  [ 'result:DOUBLE' ] ] ]
+  'params' { 'count' 'The number of numbers to generate.' 'result' 'The generated numbers.' }
+  'examples' [ '42 PRNG 1 SRANDNORMAL' '42 PRNG [ 10 SRANDNORMAL ]' ]
+  'related' [ 'SRAND' 'RANDNORMAL' 'RANDOMNORMAL' ]
+} 
+'info' STORE
+
+<%
+  // see https://docs.oracle.com/javase/8/docs/api/java/util/Random.html#nextGaussian~
+
+  'hasNext' DEFINED ! 'next' DEFINED ! ||
+  <% false 'hasNext' STORE %> IFT
+  
+  $hasNext
+  <%
+    false 'hasNext' STORE
+
+    // return
+    $next
+  %>
+  <%
+    0 's' STORE
+    <% $s 1 >= $s 0 == || %>
+    <%
+      SRAND 1 - 2 * 'v1' STORE
+      SRAND 1 - 2 * 'v2' STORE
+      $v1 $v1 * $v2 $v2 * + 's' STORE
+    %>
+    WHILE
+
+    $s LOG $s / -2 * SQRT 'multiplier' STORE
+    $multiplier $v2 * 'next' STORE
+    true 'hasNext' STORE
+
+    // return
+    $multiplier $v1 *
+  %>
+  IFTE
+%>
+'nextGaussian' STORE
+
+<%
+  !$info INFO
+  SAVE 'context' STORE
+
+  1 SWAP  <% DROP !$nextGaussian EVAL %> FOR
+
+  $context RESTORE
+%>
