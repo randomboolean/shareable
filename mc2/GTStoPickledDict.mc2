@@ -1,0 +1,89 @@
+#
+#   Copyright 2018  SenX S.A.S.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+<%
+    # Documenting the macro
+    {
+    'name' 'GTStoPickledDict'
+    'since' '1.2.4'
+    'deprecated' ''
+    'deleted' ''
+    'version' 'all'
+    'tags' [ 'gts' ]
+    'desc'
+      <'
+Convert a GTS into a pickled map of lists. Contrary to macro ListGTStoPickledDict, the list of ticks is ordered as in the GTS and can have duplicates.
+      '>
+    'sig' [ [ [ 'gts:GTS' 'withSelector:BOOLEAN' ]  [ 'result:MAP' ] ] ]
+    'params' {
+      'gts' 'The single GTS to convert'
+      'withSelector' 'Whether to use selector (true) or classname (false) for the keys of the resulting map'
+      'result' 'A pickled map of lists. The lists are the ticks, the values, and if any, the latitudes, longitudes and elevations. The lists are ordered as in the GTS'
+    }
+    'related' [ 'ListGTStoPickledDict' '->PICKLE' ]
+    'examples' [
+      <'
+NEWGTS 'randGTS' RENAME 1 10 <% h RAND RAND NaN RAND ADDVALUE %> FOR
+false
+@GTStoPickledDict
+      '>
+     ]
+    'conf' [ ]
+    } INFO
+
+    # Check there is two arguments on the stack
+    <% DEPTH 2 < %> <% 'Macro takes two arguments' MSGFAIL %> IFT
+        
+    # Check that top is a boolean indicating whether to use GTS classname or selector
+    <% 1 PICK TYPEOF 'BOOLEAN' != %> <% 'First argument must be a boolean indicating whether to use GTS selector (true) or classname (false)' MSGFAIL %> IFT
+    
+    # Check that second argument is a GTS
+    <% 2 PICK TYPEOF 'GTS' != %> <% 'Second argument must be a GTS' MSGFAIL %> IFT
+    
+    # Store the arguments
+    'withSelector' STORE
+    'gts' STORE
+    
+    # Make name
+    $gts <% $withSelector %> <% TOSELECTOR %> <% NAME %> IFTE
+    'name' STORE
+    
+    # macro: check not all NaN (for locations and elevations)
+    <% UNIQUE DUP SIZE 1 == SWAP 0 GET ISNaN && %> 'isAllNaN' STORE
+        
+    # Return pickled dict for pandas
+    {
+        # ticks
+        'timestamps' $gts TICKLIST
+        
+        # locations
+        $gts LOCATIONS 'lon' STORE 'lat' STORE
+        <% $lat @isAllNaN ! %> <% $name '.lat' + $lat %> IFT
+        <% $lon @isAllNaN ! %> <% $name '.lon' + $lon %> IFT
+        
+        # elevations
+        $gts ELEVATIONS 'elev' STORE
+        <% $elev @isAllNaN ! %> <% $name '.elev' + $elev %> IFT
+        
+        # values        
+        $name $gts VALUES
+    }
+    ->PICKLE
+%>
+'macro' STORE
+// Unit tests
+// None yet
+$macro
