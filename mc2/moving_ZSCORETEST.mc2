@@ -14,12 +14,27 @@
 #   limitations under the License.
 #
 
+{
+    'desc' 'Apply a sliding Z-score test. Outputs a boolean GTS with anomalous ticks flagged as true.'
+    'sig' [ 
+      [ [ 'steps:LONG' 'occ:LONG' 'post:LONG' 'pre:LONG' 'gts:GTS' ]  [ 'result:GTS' ] ]
+      [ [ 'steps:LONG' 'occ:LONG' 'post:LONG' 'pre:LONG' 'lgts:LIST' ]  [ 'lresult:LIST' ] ]
+    ]
+    'name' 'senx/outlier/moving_ZSCORETEST'
+}
+'.info' STORE
+
 <%
+  !$.info INFO
+  SAVE 'context' STORE
+
   // Store the argument that will be passed to MAP
   [ 'gts' 'pre' 'post' 'occ' 'steps' ] STORE
   
   // Build the custom mapper
   <%
+    SAVE 'inner_context' STORE
+
     // Make a GTS from the moving window
     LIST-> DROP [ 'cur' 'c' 'l' 't' 'lat' 'lon' 'elev' 'v' ] STORE
     $t [] [] [] $v MAKEGTS
@@ -30,9 +45,13 @@
     // Output one value per anomalous tick found
     0 'i' STORE
     { SWAP <% $i TOSTRING [ 3 ROLL NaN NaN NaN true ] $i 1 + 'i' STORE %> FOREACH }
+
+    $inner_context RESTORE
   %>
   MACROMAPPER 3 MAXLONG STRICTMAPPER 'mapper_zscore_test' STORE
 
   // call MAP to create the boolean GTS with the flagged anomalies
   [ $gts $mapper_zscore_test $pre $post $occ $steps true ] MAP MERGE 'anomalies' RENAME
+  
+  $context RESTORE
 %>

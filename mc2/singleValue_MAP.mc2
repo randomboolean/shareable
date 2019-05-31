@@ -16,22 +16,31 @@
 
 {
     'desc' 'MAP with a single-value sliding windows.'
-    'name' 'singleValue_MAP'
+    'sig' [
+        [ [ 'mapper:MAPPER' 'gts:GTS' ]  [ 'result:GTS' ] ]
+        [ [ 'mapper:MAPPER' 'lgts:LIST' ]  [ 'lresult:LIST' ] ]
+    ]
+    'name' 'senx/gts/singleValue_MAP'
 }
-'info' STORE
+'.info' STORE
 
 <%
-    !$info INFO
+    !$.info INFO
+    SAVE 'context' STORE
 
     [ 'gts' 'mapper' ] STORE
     [ $gts $mapper 0 0 0 ] MAP
+
+    $context RESTORE
 %>
-'singleValue_MAP' STORE
-$singleValue_MAP
 
 //
 // Unit test
 //
+
+SAVE '.context' STORE
+'singleValue_MAP' STORE
+$singleValue_MAP
 
 NEWGTS
 100 NaN NaN NaN 5.0 ADDVALUE
@@ -42,3 +51,5 @@ NEWGTS
 2 == ASSERT
 11.0 == ASSERT
 10.0 == ASSERT
+
+$.context RESTORE

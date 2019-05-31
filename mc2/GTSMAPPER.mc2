@@ -16,36 +16,42 @@
 
 {
     'desc' 'Convert macro that takes as argument a tick and a (sub-)GTS into a mapper.'
-    'name' 'GTSMAPPER'
+    'sig' [ [ [ 'macro:MACRO' ]  [ 'mapper:MAPPER' ] ] ]
+    'name' 'senx/gts/GTSMAPPER'
 }
-'info' STORE
+'.info' STORE
 
 <%
-    !$info INFO
+    !$.info INFO
 
-    'macro' STORE
+    '...macro' STORE
 
     <%
+        SAVE 'context' STORE
+
         LIST-> DROP [ 'cur' 'c' 'l' 't' 'lat' 'lon' 'elev' 'v' ] STORE
         $t $lat $lon $elev $v MAKEGTS
         $c 0 GET RENAME
         $l 0 GET RELABEL
 
-        $cur SWAP @macro
+        $cur SWAP $...macro EVAL
+
+        $context RESTORE
     %>
     MACROMAPPER
-
 %>
-'GTSMAPPER' STORE
 
 //
 // Unit tests
 //
 
+SAVE '.context' STORE
+'GTSMAPPER' STORE
+
 [
     [ 1 100 <% %> FOR ] [] [] [] [ 1 100 <% %> FOR ] MAKEGTS
     <% true MUSIGMA * SWAP NaN NaN NaN 5 ROLL %> @GTSMAPPER
-    5 0 0    
+    5 0 0
 ] MAP DROP
 
 //
@@ -53,3 +59,4 @@
 //
 
 $GTSMAPPER
+$.context RESTORE

@@ -14,38 +14,40 @@
 #   limitations under the License.
 #
 
-<%
-    # Documenting the macro
-    {
-    'name' 'ListGTStoPickledDict'
-    'since' '1.2.4'
-    'deprecated' ''
-    'deleted' ''
-    'version' 'all'
-    'tags' [ 'gts' ]
-    'desc'
-      <'
+# Documenting the macro
+{
+'name' 'senx/python/ListGTStoPickledDict'
+'since' '1.2.4'
+'deprecated' ''
+'deleted' ''
+'version' 'all'
+'tags' [ 'gts' ]
+'desc'
+  <'
 Convert a list of GTS into a pickled map of lists. Contrary to macro GTStoPickledDict, the list of ticks is sorted and is without duplicates.
-      '>
-    'sig' [ [ [ 'lgts:LIST<GTS>' 'withSelector:BOOLEAN' ]  [ 'result:MAP' ] ] ]
-    'params' {
-      'gts' 'The list of GTS to convert'
-      'withSelector' 'Whether to use selectors (true) or classnames (false) for the keys of the resulting map'
-      'result' 'A pickled map of lists. The map contains a sorted list of ticks present in any of the GTS, without duplicates ; and for each GTS it contains lists for its values, possibly latititudes, longitudes and elevations if any, ordered as in the GTS'
-    }
-    'related' [ 'GTStoPickledDict' '->PICKLE' ]
-    'examples' [
-      <'
+  '>
+'sig' [ [ [ 'withSelector:BOOLEAN' 'lgts:LIST<GTS>' ]  [ 'result:MAP' ] ] ]
+'params' {
+  'gts' 'The list of GTS to convert'
+  'withSelector' 'Whether to use selectors (true) or classnames (false) for the keys of the resulting map'
+  'result' 'A pickled map of lists. The map contains a sorted list of ticks present in any of the GTS, without duplicates ; and for each GTS it contains lists for its values, possibly latititudes, longitudes and elevations if any, ordered as in the GTS'
+}
+'related' [ 'GTStoPickledDict' '->PICKLE' ]
+'examples' [
+  <'
 [ NEWGTS 'randGTS' RENAME 1 10 <% h RAND RAND NaN RAND ADDVALUE %> FOR
-  NEWGTS 'randTS' RENAME 2 11 <% h NaN NaN NaN RAND ADDVALUE %> FOR
-  NEWGTS 'stringTS' RENAME 5 8 <% h NaN NaN NaN 'a string' ADDVALUE %> FOR ]
+NEWGTS 'randTS' RENAME 2 11 <% h NaN NaN NaN RAND ADDVALUE %> FOR
+NEWGTS 'stringTS' RENAME 5 8 <% h NaN NaN NaN 'a string' ADDVALUE %> FOR ]
 false
-@ListGTStoPickledDict
-      '>
-     ]
-    'conf' [ ]
-    } INFO
+@senx/python/ListGTStoPickledDict
+  '>
+  ]
+'conf' [ ]
+} '.info' STORE
 
+<%
+    !$.info INFO
+    SAVE 'context' STORE
 
     # Check there is two arguments on the stack
     <% DEPTH 2 < %> <% 'Macro takes two arguments' MSGFAIL %> IFT
@@ -106,8 +108,6 @@ false
         FOREACH
     }
     ->PICKLE
+    
+    $context RESTORE
 %>
-'macro' STORE
-// Unit tests
-// None yet
-$macro

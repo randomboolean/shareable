@@ -1,0 +1,119 @@
+#
+#   Copyright 2019  SenX S.A.S.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+{
+    'desc'
+    <'
+Automatically BUCKETIZE Geo Time Series if every tick deltas are multiples of the smallest one.
+In the other case, FAIL.
+The smallest tick delta is the resulting bucketspan (0 or 1 tick per bucket).
+Every GTS of the input list will have the same lastbucket (the latest value).
+    '>
+    'sig' [
+        [ [ 'gts:GTS' ]  [ 'result:GTS' ] ]
+        [ [ 'lgts:LIST' ]  [ 'lresult:LIST' ] ]
+    ]
+    'name' 'senx/gts/auto_BUCKETIZE'
+}
+'.info' STORE
+
+<%
+    !$.info INFO
+    SAVE 'context' STORE
+
+    'gts' STORE
+
+    // get latest tick
+    $gts TICKS DUP SIZE 1 - GET 'latest' STORE
+
+    // compute deltas for each gts
+    $gts DUP TYPEOF 'GTS' == <% 1 ->LIST %> IFT
+    [] 'res' STORE
+    <%
+        TICKS
+        [ SWAP CLONE 0 REMOVE DROP SWAP DUP SIZE 1 - REMOVE DROP ] ZIP
+        <% DROP LIST-> DROP - %> LMAP UNIQUE LSORT
+        $res APPEND UNIQUE 'res' STORE
+    %>
+    FOREACH
+    $res LSORT
+ 
+    // get smallest delta
+    0 REMOVE 'smallest' STORE
+
+    // check divisibility
+    <% $smallest % 0 != <% 'One tick delta was not a multiple of the smallest one found.' MSGFAIL %> IFT %> FOREACH
+
+    // bucketize
+    [ $gts bucketizer.last $latest $smallest 0 ] BUCKETIZE
+
+    $context RESTORE
+%>
+
+//
+// Unit test
+//
+
+SAVE '.context' STORE
+'auto_BUCKETIZE' STORE
+
+[ [ 10 20 40 60 70 80 ] [] [] [] [ 1 2 4 6 7 8 ] MAKEGTS 'gts1' RENAME
+  [ 12 32 52 72 92 ] [] [] [] [ 1 3 5 7 9 ] MAKEGTS 'gts2' RENAME ]
+@auto_BUCKETIZE
+
+0 REMOVE 'gts' STORE
+$gts NAME 'gts1' == ASSERT
+$gts VALUES LSORT LIST->
+6 == ASSERT
+8 == ASSERT
+7 == ASSERT
+6 == ASSERT
+4 == ASSERT
+2 == ASSERT
+1 == ASSERT
+$gts TICKLIST LSORT LIST->
+6 == ASSERT
+82 == ASSERT
+72 == ASSERT
+62 == ASSERT
+42 == ASSERT
+22 == ASSERT
+12 == ASSERT
+$gts BUCKETCOUNT 9 == ASSERT
+$gts LASTBUCKET 92 == ASSERT
+$gts BUCKETSPAN 10 == ASSERT
+0 GET 'gts' STORE
+$gts NAME 'gts2' == ASSERT
+$gts VALUES LSORT LIST->
+5 == ASSERT
+9 == ASSERT
+7 == ASSERT
+5 == ASSERT
+3 == ASSERT
+1 == ASSERT
+$gts TICKLIST LSORT LIST->
+5 == ASSERT
+92 == ASSERT
+72 == ASSERT
+52 == ASSERT
+32 == ASSERT
+12 == ASSERT
+$gts BUCKETCOUNT 9 == ASSERT
+$gts LASTBUCKET 92 == ASSERT
+$gts BUCKETSPAN 10 == ASSERT
+
+$auto_BUCKETIZE
+$.context RESTORE

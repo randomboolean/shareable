@@ -15,14 +15,14 @@
 #
 
 {
-  'name' 'RANDNORMAL'
+  'name' 'senx/rand/RANDNORMAL'
   'desc' 'Generate random numbers from a normal distribution with mean 0.0 and std 1.0. The generation is cryptographically secure.'
   'sig' [ [ [ 'count:LONG' ]  [ 'result:DOUBLE+' ] ] ]
   'params' { 'count' 'The number of numbers to generate.' 'result' 'The generated numbers.' }
   'examples' [ '1 RANDNORMAL' '[ 10 RANDNORMAL ]' ]
   'related' [ 'RAND' 'RANDOMNORMAL' 'SRANDNORMAL' ]
 }
-'info' STORE
+'.info' STORE
 
 <%
   // see https://docs.oracle.com/javase/8/docs/api/java/util/Random.html#nextGaussian~
@@ -56,13 +56,14 @@
   %>
   IFTE
 %>
-'nextGaussian' STORE
+'.nextGaussian' STORE
 
 <%
-  !$info INFO
+  !$.info INFO
   SAVE 'context' STORE
 
-  1 SWAP  <% DROP !$nextGaussian EVAL %> FOR
+  'N' STORE
+  1 $N  <% DROP !$.nextGaussian EVAL %> FOR
 
   $context RESTORE
 %>
