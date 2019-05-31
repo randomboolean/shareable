@@ -1,0 +1,15 @@
+//
+// Source: https://trends.google.fr/trends
+//
+
+{
+    'name' 'senx/dataset/keyword_trends'
+    'desc' 'A gts of the trend of keyword "star trek" in google searches.'
+    'examples' [ '@senx/dataset/keyword_trends' ]
+} '.info' STORE
+
+<%
+!$.info INFO
+"60VBOqxjOql_MrGmOLtZ5k570qh_TMSjRaF8RrGWRX0oRaKf4V.L.0g..4N.5Dc16sg7.........8LKgJf3F015KkZLKhe8WA23Z193st2YZ0Ge7GP6L4Yt50OqCcREs.B7jcQEcmxWuKbc8ClwDt_NvOzObMxbzdqOE7IguzEXuHCgggEpyir_xTIVSkapV3d.9P2SEff8u2DSf.9AD5wjcDcOcYdGeiyN8XfHOiqCX94JdKqbrMwisCGHAT95pZwTngM7K_8d7rk33o6RQwrRFXY.ZZzNPb0al9iEt_OTQVyH2xKZPKxN5zZJwJQXnCBTlyX60g3mlMg0Hk5SV8L.xtozxAofdZR0Sk8i04mf8hw6MuRXjl8k8a.0jIhgnM0aYgIKk._AxSp.gpcMfSJa9.1by_bfJIBVU4liIZSrQ2PkN08NvKd2rqRdXD6KAz4FLaiy_pYwMwYkEVZLtIn6oFKN9XSrNwFvbGTDN3aBdE5qSue7Rxk84G4ODUkfNoDqoWPuIMik.IaoJCl5Xzs.8YQpl8B7...LXVFG.."
+UNWRAP
+%>
