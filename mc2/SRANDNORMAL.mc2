@@ -41,8 +41,8 @@
     0 's' STORE
     <% $s 1 >= $s 0 == || %>
     <%
-      SRAND 1 - 2 * 'v1' STORE
-      SRAND 1 - 2 * 'v2' STORE
+      SRAND 2 * 1 - 'v1' STORE
+      SRAND 2 * 1 - 'v2' STORE
       $v1 $v1 * $v2 $v2 * + 's' STORE
     %>
     WHILE
